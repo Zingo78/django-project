@@ -1,0 +1,269 @@
+django创建项目
+	django-admin startproject 项目名
+django启动
+	python3 manage.py runserver + 端口号(默认8000)
+django创建应用
+	python3 manage.py startapp 应用名
+
+
+
+
+uwsgi命令
+	查看版本
+		sudo pip3 freeze|grep -i 'uwsgi'
+	启动
+		uwsgi --ini uwsgi.ini
+	查看状态
+		ps aux|grep 'uwsgi'
+	停止uwsgi
+		uwsgi --stop uwsgi.pid
+
+
+
+nginx命令
+	nginx查看版本
+		nginx -v
+	nginx 启动和停止
+		service nginx start
+		sudo /etc/init.d/nginx restart 重启
+		service nginx stop
+		sudo nginx -s quit
+	测试当前nginx的配置是否正确
+		sudo nginx -t
+	进入nginx的默认配置文件
+		sudo vim /etc/nginx/sites-enabled/default
+			sudo nginx -t 检查nignx配置文件语法错误
+	nginx日志文件
+		日志目录：/var/log/nginx/error.log
+		基础配置项文件路径：/etc/nginx/nginx.conf
+	
+redis安装
+	现解压在/opt
+	安装位置/usr/local/bin	
+		sudo apt-get install redis-server
+	配置文件位置
+		/etc/redis/
+	服务端启动/停止/重启
+		sudo /etc/ini.d/redis-server status|start|stop|restart
+	客户端连接
+		redis-cli -h IP地址 -p 6379 -a 密码
+
+
+redis命令
+	启动、停止redis
+		/etc/init.d/redis-server start|stop
+	切换数据库(number为数据库序号)
+		select number
+	查看redis服务的整体情况
+		info
+	查找所有符合给定模式的key   说明：由于redis是单进程单线程，当key很多时，当前命令可能阻塞redis
+		keys 表达式  keys * 匹配数据库中所有key		
+					keys h?llo匹配hello，hallo和hxllo等
+					keys h*llo匹配hllo和heeeeello等
+	返回当前键的数据类型
+		type key
+	返回当前键是否存在 1表存在
+		exists key
+	删除key
+		del key
+	重命名当前key的名字
+		rename key newkey
+	清除当前所在数据库数据
+		flushdb
+	清除所有数据库数据
+		flushall
+redis字符串命令
+	设置一个字符串的key
+		set key value nx ex   nx not exist 代表当key不存在时，才会存储这个key	ex expire过期时间 单位s
+	获取key的值
+		get key
+	获取key存储值的长度
+		strlen key
+	获取制定范围切片内容【包含start stop】
+		getrange key start stop
+	从索引之开始，用value替换原内容，返回最新长度
+		setrange key index value
+	批量添加key和value
+		mset key1 value1 key2 value2 key3 value3
+	批量获取key的值
+		mget key1 key2 key3
+	将key增加指定步长
+		incrby key 步长
+	将key减少指定步长
+		decrby key 步长
+	+1操作
+		incr key
+	-1操作
+		decr key
+	设置过期时间
+		set key value ex 3  #秒
+	查看过期时间 -1:当前key没有过期时间；>0:剩余过期时间；-2:key不存在
+		ttl key
+	删除过期时间
+		persist key
+	过期时间分为惰性删除和定期删除
+redis列表命令
+	增加数据
+		LPUSH key value1 value2	从列表头部压入元素 返回list最新长度
+		RPUSH key value1 value2 从尾部压入元素 返回list最新长度
+		RPOPLPUSH src dst 从列表src尾部弹出一个元素，压入列表dst的头部
+		LINSERT key after|before value newvalue 在列表指定元素后/前插入元素
+			命令执行成功返回列表长度；未找到元素返回-1；如果key不存在或为空列表返回0
+	查看列表中元素
+		LRANGE key start stop
+	获取列表长度
+		LLEN key
+	删除
+		LPOP key 从列表头部弹出1个元素
+		RPOP key 从列表尾部弹出1个元素
+		BLPOP key 列表头部，阻塞弹出，列表为空时阻塞
+		BRPOP key 列表尾部，阻塞弹出，列表为空时阻塞
+		LREM key count value 删除指定元素
+		LTRIM key start stop 保留指定范围内的元素
+		LSET key index newvalue 设置list指定索引的值
+位图操作
+	设置某位置上的二进制值
+		SET key offset value
+	获取某一位上的值
+		GETBIT key offset
+	统计键所对应的值中有多少个
+		BITCOUNT key start end  后面的参数是字节索引
+哈希命令
+	设置单个字段
+		HSET key field value
+		HSETNX key field value
+	设置多个字段
+		HSET key field value field value
+	返回字段个数
+		HLEN key
+		HSET key field value
+	判断字段是否存在
+		HEXISTS key field
+	返回字段值
+		HGET key field
+	返回多个字段值
+		HMGET key field field
+	返回所有键值对
+		HGETALL key
+	返回所有字段名
+		HKEYS key
+	返回所有值
+		HVALS key
+	删除指定字段
+		HDEL key field
+	在字段对应值上进行整数增量运算
+		HINCRBY key field increment
+		HINCRBYFLOAT key field increment
+	pthon操作hash
+		更新一条数据的属性没有则新建
+			hset(name,key,value)
+		读取这条数据的指定属性，返回字符串类型
+			hget(name,key)
+		批量更新数据属性 没有则新建，参数为字典
+			hmset(name,mapping)
+		批量读取数据属性 没有则新建
+			hmget(name,keys)
+		获取这条数据的所有属性和对应的值，返回字典类型
+			hgetall(name)
+		获取这条数据的所有属性名，返回列表类型
+			hkeys(name)
+		删除这条数据的指定属性
+			hdel(name,*keys)
+集合命令
+	增加一个或者多个元素，自动去重；返回值为成功插入到集合的元素个数
+		SADD key member1 member2
+	查看集合中的所有元素
+		SMEMBERS key
+	删除一个或多个元素，元素不存在自动忽略		
+		SREM key member1 member2
+	元素是否存在
+		SISMEMBER key member
+	随机返回集合中指定个数的元素，默认为1个
+		SRANDMEMBER key [count]
+	弹出成员
+		SPOP key [count]
+	返回集合中元素的个数
+		SCARD key
+	把元素从源集合移动到目标集合
+		SMOVE source destination member
+	差集(number1 1 2 3 number2 1 2 4 结果为3)
+		SDIFF key1 key2
+	差集保存到另一个集合
+		SDIFFSTORE destination key1 key2
+	交集
+		SINTER key1 key2
+		SINTERSTORE destination key1 key2
+	并集
+		SUNION key1 key2
+		SUNIONSTORE destination key1 key2
+有序集合命令
+	在有序集合中添加一个成员返回值为成功插入到集合中的元素个数
+		zadd key score member
+	查看指定区间元素(升序)
+		zrange key start stop [withscores]
+	查看指定区间元素(降序)
+		zrevrange key start stop [withscores]
+	查看指定元素的分值
+		zscore key member
+	返回指定区间元素
+		zrangebyscore key min max [withscore] [limit offest count]
+	删除成员
+		zrem key member
+	增加或者减少分值
+		zincrby key increment member
+	返回元素排名
+		zrank key member
+	返回元素逆序排名	
+		zrevrank key member 
+	删除指定区间元素(默认闭区间，可作开区间)
+		zremrangebyscore key min max
+	返回集合中元素个数
+		zcard key
+	返回指定范围中元素的个数(默认闭区间，可作开区间)
+		zcount key min max
+	并集
+		zunionstore destination numkeys key [weights 权重值] [AGGREGATE SUM|MIN|MAX]		
+	交集
+		zinterstore destination numkeys key1 key2 wrights weight AGGREGATE[SUM|MIN|MAX]
+		
+redis事务命令
+	开启事务
+		MULTI
+	提交到数据库执行
+		EXEC
+	取消事务
+		DISCARD
+reids数据持久化
+	默认文件名
+		/var/lib/redis/dump.rdb
+	文件名及目录可在配置文件中修改【/etc/redis/redis.conf】
+		263行: dir /var/lib/redis #表示rdb文件存放路径
+		253行: dbfilename dump.rdb #文件名
+主从复制
+	建立主从端口的联系
+		redis-server --port 6300 --slaveof 127.0.0.1 6379
+		1、>slaveof IP PORT成为谁的从
+		2、>slaveof no one'自封为王'
+哨兵
+	安装
+		sudo apt install redis-sentinel
+	停用可验证是否存在
+		sudo /etc/init.d/redis-sentinel stop
+	配置配置文件
+		port 26379
+		sentinel monitor zingo 127.0.0.1 6379 1
+	启动sentinel
+		方式一:	redis-serntinel sentinel.conf
+		方式二:	redi-server sentinel.conf --sentinel
+	
+
+
+
+
+
+
+
+
+	
+
+	
